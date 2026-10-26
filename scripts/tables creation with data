@@ -1,0 +1,468 @@
+
+-- =========================================
+-- 1. Create schema
+-- =========================================
+CREATE SCHEMA IF NOT EXISTS employee_management;
+
+SET search_path TO employee_management, public;
+
+-- =========================================
+-- 2. Department table
+-- =========================================
+CREATE TABLE IF NOT EXISTS department (
+    department_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    department_name VARCHAR(100) NOT NULL UNIQUE,
+    location VARCHAR(100),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================================
+-- 3. Employee table
+-- =========================================
+CREATE TABLE IF NOT EXISTS employee (
+    employee_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    phone VARCHAR(20),
+    date_of_birth DATE,
+    hire_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    job_title VARCHAR(100),
+    salary NUMERIC(12, 2) NOT NULL CHECK (salary >= 0),
+    department_id BIGINT NOT NULL,
+    manager_id BIGINT,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
+        CHECK (status IN ('ACTIVE', 'INACTIVE', 'ON_LEAVE')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_employee_department
+        FOREIGN KEY (department_id)
+        REFERENCES department(department_id),
+
+    CONSTRAINT fk_employee_manager
+        FOREIGN KEY (manager_id)
+        REFERENCES employee(employee_id),
+
+    CONSTRAINT chk_employee_manager
+        CHECK (manager_id IS NULL OR manager_id <> employee_id)
+);
+
+-- =========================================
+-- 4. Employee address table
+-- =========================================
+CREATE TABLE IF NOT EXISTS employee_address (
+    address_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    address_type VARCHAR(20) NOT NULL DEFAULT 'HOME'
+        CHECK (address_type IN ('HOME', 'OFFICE', 'OTHER')),
+    address_line1 VARCHAR(200) NOT NULL,
+    address_line2 VARCHAR(200),
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100),
+    postal_code VARCHAR(15),
+    country VARCHAR(100) NOT NULL DEFAULT 'India',
+
+    CONSTRAINT fk_address_employee
+        FOREIGN KEY (employee_id)
+        REFERENCES employee(employee_id)
+        ON DELETE CASCADE
+);
+
+-- =========================================
+-- 5. Employee salary history
+-- =========================================
+CREATE TABLE IF NOT EXISTS employee_salary (
+    salary_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    salary NUMERIC(12, 2) NOT NULL CHECK (salary >= 0),
+    effective_from DATE NOT NULL DEFAULT CURRENT_DATE,
+    effective_to DATE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_salary_employee
+        FOREIGN KEY (employee_id)
+        REFERENCES employee(employee_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_salary_dates
+        CHECK (effective_to IS NULL OR effective_to >= effective_from),
+
+    CONSTRAINT uq_employee_salary_start
+        UNIQUE (employee_id, effective_from)
+);
+
+-- =========================================
+-- 6. Employee attendance
+-- =========================================
+CREATE TABLE IF NOT EXISTS attendance (
+    attendance_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    attendance_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    check_in TIME,
+    check_out TIME,
+    attendance_status VARCHAR(20) NOT NULL DEFAULT 'PRESENT'
+        CHECK (attendance_status IN (
+            'PRESENT', 'ABSENT', 'HALF_DAY', 'ON_LEAVE'
+        )),
+
+    CONSTRAINT fk_attendance_employee
+        FOREIGN KEY (employee_id)
+        REFERENCES employee(employee_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uq_employee_attendance_date
+        UNIQUE (employee_id, attendance_date),
+
+    CONSTRAINT chk_attendance_times
+        CHECK (check_out IS NULL OR check_in IS NULL
+               OR check_out >= check_in)
+);
+
+-- =========================================
+-- 7. Employee leave requests
+-- =========================================
+CREATE TABLE IF NOT EXISTS leave_request (
+    leave_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    leave_type VARCHAR(30) NOT NULL
+        CHECK (leave_type IN (
+            'CASUAL', 'SICK', 'EARNED', 'UNPAID'
+        )),
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    reason TEXT,
+    leave_status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (leave_status IN (
+            'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'
+        )),
+    approved_by BIGINT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_leave_employee
+        FOREIGN KEY (employee_id)
+        REFERENCES employee(employee_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_leave_approver
+        FOREIGN KEY (approved_by)
+        REFERENCES employee(employee_id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT chk_leave_dates
+        CHECK (end_date >= start_date)
+);
+
+-- =========================================
+-- 8. Indexes for frequently queried columns
+-- =========================================
+CREATE INDEX IF NOT EXISTS idx_employee_department
+    ON employee(department_id);
+
+CREATE INDEX IF NOT EXISTS idx_employee_manager
+    ON employee(manager_id);
+
+CREATE INDEX IF NOT EXISTS idx_employee_status
+    ON employee(status);
+
+CREATE INDEX IF NOT EXISTS idx_attendance_date
+    ON attendance(attendance_date);
+
+CREATE INDEX IF NOT EXISTS idx_leave_employee
+    ON leave_request(employee_id);
+
+CREATE INDEX IF NOT EXISTS idx_leave_status
+    ON leave_request(leave_status);
+===========================================================================
+SET search_path TO employee_management, public;
+
+INSERT INTO department (department_name, location)
+VALUES
+('Engineering', 'Bengaluru'),
+('Human Resources', 'Bengaluru'),
+('Finance', 'Mumbai'),
+('Sales', 'Chennai'),
+('Marketing', 'Hyderabad'),
+('Operations', 'Pune'),
+('IT Support', 'Bengaluru'),
+('Quality Assurance', 'Hyderabad'),
+('Research and Development', 'Pune'),
+('Customer Support', 'Chennai'),
+('Product Management', 'Bengaluru'),
+('Legal', 'Mumbai'),
+('Administration', 'Delhi'),
+('Procurement', 'Pune'),
+('Logistics', 'Chennai'),
+('Data Analytics', 'Bengaluru'),
+('Cyber Security', 'Hyderabad'),
+('Business Development', 'Mumbai'),
+('Training', 'Delhi'),
+('Design', 'Bengaluru')
+ON CONFLICT (department_name)
+DO UPDATE SET location = EXCLUDED.location;
+=================================================================
+INSERT INTO employee (
+    first_name, last_name, email, phone,
+    date_of_birth, hire_date, job_title,
+    salary, department_id, status
+)
+SELECT
+    v.first_name,
+    v.last_name,
+    v.email,
+    v.phone,
+    v.date_of_birth,
+    v.hire_date,
+    v.job_title,
+    v.salary,
+    d.department_id,
+    v.status
+FROM (
+    VALUES
+    ('Aarav', 'Mehta', 'aarav.mehta@example.com', '9000000001', DATE '1990-02-15', DATE '2022-01-10', 'Engineering Manager', 120000.00, 'Engineering', 'ACTIVE'),
+    ('Priya', 'Sharma', 'priya.sharma@example.com', '9000000002', DATE '1995-05-20', DATE '2023-03-15', 'Java Developer', 80000.00, 'Engineering', 'ACTIVE'),
+    ('Rahul', 'Verma', 'rahul.verma@example.com', '9000000003', DATE '1988-08-12', DATE '2021-06-01', 'HR Manager', 95000.00, 'Human Resources', 'ACTIVE'),
+    ('Sneha', 'Rao', 'sneha.rao@example.com', '9000000004', DATE '1994-11-25', DATE '2023-07-10', 'Accountant', 65000.00, 'Finance', 'ACTIVE'),
+    ('Kiran', 'Patel', 'kiran.patel@example.com', '9000000005', DATE '1992-04-18', DATE '2022-09-05', 'Sales Executive', 60000.00, 'Sales', 'ACTIVE'),
+    ('Ananya', 'Iyer', 'ananya.iyer@example.com', '9000000006', DATE '1996-01-30', DATE '2024-01-15', 'Marketing Specialist', 70000.00, 'Marketing', 'ACTIVE'),
+    ('Vikram', 'Reddy', 'vikram.reddy@example.com', '9000000007', DATE '1989-07-09', DATE '2020-11-20', 'Operations Manager', 110000.00, 'Operations', 'ACTIVE'),
+    ('Divya', 'Nair', 'divya.nair@example.com', '9000000008', DATE '1997-03-22', DATE '2024-02-01', 'IT Support Engineer', 55000.00, 'IT Support', 'ACTIVE'),
+    ('Arjun', 'Kulkarni', 'arjun.kulkarni@example.com', '9000000009', DATE '1993-12-05', DATE '2022-05-16', 'QA Engineer', 75000.00, 'Quality Assurance', 'ACTIVE'),
+    ('Meera', 'Joshi', 'meera.joshi@example.com', '9000000010', DATE '1991-06-14', DATE '2021-08-23', 'Research Scientist', 105000.00, 'Research and Development', 'ACTIVE'),
+    ('Rohan', 'Das', 'rohan.das@example.com', '9000000011', DATE '1998-09-17', DATE '2024-04-08', 'Support Executive', 45000.00, 'Customer Support', 'ACTIVE'),
+    ('Kavya', 'Menon', 'kavya.menon@example.com', '9000000012', DATE '1992-10-11', DATE '2022-12-12', 'Product Manager', 115000.00, 'Product Management', 'ACTIVE'),
+    ('Aditya', 'Singh', 'aditya.singh@example.com', '9000000013', DATE '1987-01-08', DATE '2019-04-01', 'Legal Advisor', 125000.00, 'Legal', 'ACTIVE'),
+    ('Pooja', 'Gupta', 'pooja.gupta@example.com', '9000000014', DATE '1995-08-26', DATE '2023-06-19', 'Administrator', 50000.00, 'Administration', 'ACTIVE'),
+    ('Suresh', 'Naidu', 'suresh.naidu@example.com', '9000000015', DATE '1990-12-19', DATE '2021-02-10', 'Procurement Officer', 68000.00, 'Procurement', 'ACTIVE'),
+    ('Nisha', 'Pillai', 'nisha.pillai@example.com', '9000000016', DATE '1996-07-03', DATE '2024-03-04', 'Logistics Coordinator', 52000.00, 'Logistics', 'ACTIVE'),
+    ('Manoj', 'Shetty', 'manoj.shetty@example.com', '9000000017', DATE '1991-09-28', DATE '2020-07-13', 'Data Analyst', 90000.00, 'Data Analytics', 'ACTIVE'),
+    ('Ishita', 'Roy', 'ishita.roy@example.com', '9000000018', DATE '1997-02-09', DATE '2024-05-20', 'Security Analyst', 85000.00, 'Cyber Security', 'ACTIVE'),
+    ('Deepak', 'Mishra', 'deepak.mishra@example.com', '9000000019', DATE '1988-05-16', DATE '2021-10-11', 'Business Development Manager', 100000.00, 'Business Development', 'ACTIVE'),
+    ('Neha', 'Fernandes', 'neha.fernandes@example.com', '9000000020', DATE '1994-03-07', DATE '2023-09-18', 'UI Designer', 78000.00, 'Design', 'ACTIVE')
+) AS v(
+    first_name, last_name, email, phone,
+    date_of_birth, hire_date, job_title,
+    salary, department_name, status
+)
+JOIN department d
+    ON d.department_name = v.department_name
+ON CONFLICT (email) DO UPDATE SET
+    first_name = EXCLUDED.first_name,
+    last_name = EXCLUDED.last_name,
+    phone = EXCLUDED.phone,
+    date_of_birth = EXCLUDED.date_of_birth,
+    hire_date = EXCLUDED.hire_date,
+    job_title = EXCLUDED.job_title,
+    salary = EXCLUDED.salary,
+    department_id = EXCLUDED.department_id,
+    status = EXCLUDED.status,
+    updated_at = CURRENT_TIMESTAMP;
+    =======================================================================
+
+    UPDATE employee e
+    SET manager_id = m.employee_id,
+        updated_at = CURRENT_TIMESTAMP
+    FROM (
+        VALUES
+        ('priya.sharma@example.com', 'aarav.mehta@example.com'),
+        ('sneha.rao@example.com', 'rahul.verma@example.com'),
+        ('kiran.patel@example.com', 'aarav.mehta@example.com'),
+        ('ananya.iyer@example.com', 'aarav.mehta@example.com'),
+        ('divya.nair@example.com', 'aarav.mehta@example.com'),
+        ('arjun.kulkarni@example.com', 'aarav.mehta@example.com'),
+        ('rohan.das@example.com', 'rahul.verma@example.com'),
+        ('pooja.gupta@example.com', 'rahul.verma@example.com'),
+        ('suresh.naidu@example.com', 'rahul.verma@example.com'),
+        ('nisha.pillai@example.com', 'aarav.mehta@example.com'),
+        ('manoj.shetty@example.com', 'aarav.mehta@example.com'),
+        ('ishita.roy@example.com', 'aarav.mehta@example.com'),
+        ('neha.fernandes@example.com', 'aarav.mehta@example.com')
+    ) AS x(employee_email, manager_email)
+    JOIN employee m ON m.email = x.manager_email
+    WHERE e.email = x.employee_email;
+    =================================================================================
+    INSERT INTO employee_salary (
+        employee_id, salary, effective_from
+    )
+    SELECT
+        e.employee_id,
+        e.salary,
+        e.hire_date
+    FROM employee e
+    WHERE e.email IN (
+        'aarav.mehta@example.com',
+        'priya.sharma@example.com',
+        'rahul.verma@example.com',
+        'sneha.rao@example.com',
+        'kiran.patel@example.com',
+        'ananya.iyer@example.com',
+        'vikram.reddy@example.com',
+        'divya.nair@example.com',
+        'arjun.kulkarni@example.com',
+        'meera.joshi@example.com',
+        'rohan.das@example.com',
+        'kavya.menon@example.com',
+        'aditya.singh@example.com',
+        'pooja.gupta@example.com',
+        'suresh.naidu@example.com',
+        'nisha.pillai@example.com',
+        'manoj.shetty@example.com',
+        'ishita.roy@example.com',
+        'deepak.mishra@example.com',
+        'neha.fernandes@example.com'
+    )
+    ON CONFLICT (employee_id, effective_from) DO NOTHING;
+    ===================================
+    INSERT INTO employee_address (
+        employee_id, address_type, address_line1,
+        address_line2, city, state, postal_code, country
+    )
+    SELECT
+        e.employee_id,
+        'HOME',
+        v.address_line1,
+        v.address_line2,
+        v.city,
+        v.state,
+        v.postal_code,
+        'India'
+    FROM (
+        VALUES
+        ('aarav.mehta@example.com', '12 MG Road', 'Apartment 101', 'Bengaluru', 'Karnataka', '560001'),
+        ('priya.sharma@example.com', '24 Brigade Road', 'Flat 202', 'Bengaluru', 'Karnataka', '560025'),
+        ('rahul.verma@example.com', '35 Marine Drive', 'Flat 303', 'Mumbai', 'Maharashtra', '400020'),
+        ('sneha.rao@example.com', '46 Anna Salai', 'Flat 404', 'Chennai', 'Tamil Nadu', '600002'),
+        ('kiran.patel@example.com', '57 Banjara Hills', 'House 5', 'Hyderabad', 'Telangana', '500034'),
+        ('ananya.iyer@example.com', '68 Koregaon Park', 'Flat 606', 'Pune', 'Maharashtra', '411001'),
+        ('vikram.reddy@example.com', '79 Whitefield Road', 'Villa 7', 'Bengaluru', 'Karnataka', '560066'),
+        ('divya.nair@example.com', '81 Hitech City', 'Flat 808', 'Hyderabad', 'Telangana', '500081'),
+        ('arjun.kulkarni@example.com', '92 FC Road', 'Flat 909', 'Pune', 'Maharashtra', '411004'),
+        ('meera.joshi@example.com', '13 T Nagar', 'Flat 110', 'Chennai', 'Tamil Nadu', '600017'),
+        ('rohan.das@example.com', '14 Salt Lake', 'Block B', 'Kolkata', 'West Bengal', '700091'),
+        ('kavya.menon@example.com', '25 Indiranagar', 'Flat 120', 'Bengaluru', 'Karnataka', '560038'),
+        ('aditya.singh@example.com', '36 Connaught Place', 'Floor 2', 'Delhi', 'Delhi', '110001'),
+        ('pooja.gupta@example.com', '47 Dwarka', 'Flat 140', 'Delhi', 'Delhi', '110075'),
+        ('suresh.naidu@example.com', '58 Kothrud', 'Flat 150', 'Pune', 'Maharashtra', '411038'),
+        ('nisha.pillai@example.com', '69 Velachery', 'Flat 160', 'Chennai', 'Tamil Nadu', '600042'),
+        ('manoj.shetty@example.com', '71 Electronic City', 'Flat 170', 'Bengaluru', 'Karnataka', '560100'),
+        ('ishita.roy@example.com', '82 Gachibowli', 'Flat 180', 'Hyderabad', 'Telangana', '500032'),
+        ('deepak.mishra@example.com', '93 Andheri East', 'Flat 190', 'Mumbai', 'Maharashtra', '400069'),
+        ('neha.fernandes@example.com', '15 Koramangala', 'Flat 200', 'Bengaluru', 'Karnataka', '560034')
+    ) AS v(email, address_line1, address_line2, city, state, postal_code)
+    JOIN employee e ON e.email = v.email
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM employee_address a
+        WHERE a.employee_id = e.employee_id
+          AND a.address_type = 'HOME'
+    );
+    ========================================
+    INSERT INTO attendance (
+        employee_id, attendance_date,
+        check_in, check_out, attendance_status
+    )
+    SELECT
+        e.employee_id,
+        DATE '2026-10-20',
+        v.check_in,
+        v.check_out,
+        v.attendance_status
+    FROM (
+        VALUES
+        ('aarav.mehta@example.com', TIME '09:00', TIME '18:00', 'PRESENT'),
+        ('priya.sharma@example.com', TIME '09:10', TIME '18:05', 'PRESENT'),
+        ('rahul.verma@example.com', TIME '09:00', TIME '18:00', 'PRESENT'),
+        ('sneha.rao@example.com', TIME '09:15', TIME '18:10', 'PRESENT'),
+        ('kiran.patel@example.com', TIME '09:05', TIME '18:00', 'PRESENT'),
+        ('ananya.iyer@example.com', TIME '09:00', TIME '13:00', 'HALF_DAY'),
+        ('vikram.reddy@example.com', TIME '08:55', TIME '18:00', 'PRESENT'),
+        ('divya.nair@example.com', TIME '09:20', TIME '18:15', 'PRESENT'),
+        ('arjun.kulkarni@example.com', TIME '09:00', TIME '18:00', 'PRESENT'),
+        ('meera.joshi@example.com', TIME '09:10', TIME '18:00', 'PRESENT'),
+        ('rohan.das@example.com', NULL, NULL, 'ABSENT'),
+        ('kavya.menon@example.com', TIME '09:00', TIME '18:10', 'PRESENT'),
+        ('aditya.singh@example.com', TIME '09:05', TIME '18:00', 'PRESENT'),
+        ('pooja.gupta@example.com', TIME '09:00', TIME '18:00', 'PRESENT'),
+        ('suresh.naidu@example.com', TIME '09:15', TIME '18:00', 'PRESENT'),
+        ('nisha.pillai@example.com', TIME '09:00', TIME '13:00', 'HALF_DAY'),
+        ('manoj.shetty@example.com', TIME '09:05', TIME '18:05', 'PRESENT'),
+        ('ishita.roy@example.com', TIME '09:00', TIME '18:00', 'PRESENT'),
+        ('deepak.mishra@example.com', NULL, NULL, 'ABSENT'),
+        ('neha.fernandes@example.com', TIME '09:10', TIME '18:10', 'PRESENT')
+    ) AS v(email, check_in, check_out, attendance_status)
+    JOIN employee e ON e.email = v.email
+    ON CONFLICT (employee_id, attendance_date) DO NOTHING;
+    ================================
+    INSERT INTO leave_request (
+        employee_id, leave_type, start_date, end_date,
+        reason, leave_status, approved_by
+    )
+    SELECT
+        e.employee_id,
+        v.leave_type,
+        v.start_date,
+        v.end_date,
+        v.reason,
+        v.leave_status,
+        e.manager_id
+    FROM (
+        VALUES
+        ('aarav.mehta@example.com', 'CASUAL', DATE '2026-11-02', DATE '2026-11-03', 'Family function', 'APPROVED'),
+        ('priya.sharma@example.com', 'SICK', DATE '2026-10-28', DATE '2026-10-29', 'Medical rest', 'PENDING'),
+        ('rahul.verma@example.com', 'EARNED', DATE '2026-11-10', DATE '2026-11-12', 'Personal vacation', 'APPROVED'),
+        ('sneha.rao@example.com', 'CASUAL', DATE '2026-11-05', DATE '2026-11-05', 'Personal work', 'PENDING'),
+        ('kiran.patel@example.com', 'SICK', DATE '2026-10-30', DATE '2026-10-30', 'Fever', 'APPROVED'),
+        ('ananya.iyer@example.com', 'EARNED', DATE '2026-11-15', DATE '2026-11-17', 'Travel plans', 'REJECTED'),
+        ('vikram.reddy@example.com', 'CASUAL', DATE '2026-11-20', DATE '2026-11-20', 'Family commitment', 'APPROVED'),
+        ('divya.nair@example.com', 'SICK', DATE '2026-11-01', DATE '2026-11-02', 'Medical appointment', 'PENDING'),
+        ('arjun.kulkarni@example.com', 'EARNED', DATE '2026-12-01', DATE '2026-12-04', 'Annual vacation', 'APPROVED'),
+        ('meera.joshi@example.com', 'CASUAL', DATE '2026-11-08', DATE '2026-11-08', 'Personal work', 'CANCELLED'),
+        ('rohan.das@example.com', 'UNPAID', DATE '2026-11-12', DATE '2026-11-13', 'Personal reasons', 'PENDING'),
+        ('kavya.menon@example.com', 'EARNED', DATE '2026-12-10', DATE '2026-12-12', 'Family vacation', 'APPROVED'),
+        ('aditya.singh@example.com', 'CASUAL', DATE '2026-11-18', DATE '2026-11-18', 'Personal appointment', 'REJECTED'),
+        ('pooja.gupta@example.com', 'SICK', DATE '2026-11-03', DATE '2026-11-04', 'Medical rest', 'APPROVED'),
+        ('suresh.naidu@example.com', 'EARNED', DATE '2026-12-15', DATE '2026-12-17', 'Travel', 'PENDING'),
+        ('nisha.pillai@example.com', 'CASUAL', DATE '2026-11-22', DATE '2026-11-22', 'Family event', 'APPROVED'),
+        ('manoj.shetty@example.com', 'SICK', DATE '2026-11-06', DATE '2026-11-06', 'Medical appointment', 'PENDING'),
+        ('ishita.roy@example.com', 'EARNED', DATE '2026-12-20', DATE '2026-12-22', 'Year-end vacation', 'APPROVED'),
+        ('deepak.mishra@example.com', 'UNPAID', DATE '2026-11-25', DATE '2026-11-26', 'Personal reasons', 'REJECTED'),
+        ('neha.fernandes@example.com', 'CASUAL', DATE '2026-11-30', DATE '2026-11-30', 'Personal work', 'PENDING')
+    ) AS v(email, leave_type, start_date, end_date, reason, leave_status)
+    JOIN employee e ON e.email = v.email
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM leave_request lr
+        WHERE lr.employee_id = e.employee_id
+          AND lr.start_date = v.start_date
+          AND lr.leave_type = v.leave_type
+    );
+    =======================================
+    SELECT 'department' AS table_name, COUNT(*) AS total_records
+    FROM employee_management.department
+
+    UNION ALL
+
+    SELECT 'employee', COUNT(*)
+    FROM employee_management.employee
+
+    UNION ALL
+
+    SELECT 'employee_address', COUNT(*)
+    FROM employee_management.employee_address
+
+    UNION ALL
+
+    SELECT 'employee_salary', COUNT(*)
+    FROM employee_management.employee_salary
+
+    UNION ALL
+
+    SELECT 'attendance', COUNT(*)
+    FROM employee_management.attendance
+
+    UNION ALL
+
+    SELECT 'leave_request', COUNT(*)
+    FROM employee_management.leave_request
+
+    ORDER BY table_name;
