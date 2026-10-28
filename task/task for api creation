@@ -1,0 +1,369 @@
+Beginner: Controller, service, repository, entity and DTO.
+
+Intermediate: Joins, derived queries, pagination, sorting and validation.
+
+Advanced: Transactions, bulk operations, custom SQL, exception handling and reporting.
+
+Expert: Spring Security, JWT, role-based access, idempotency, logging, metrics and testing.
+=====================================================
+Level 1 — BeginnerBasic CRUD and HTTP methods0/10 completed
+[ ] Create department
+POST
+/api/departments
+
+
+
+[ ] Get all departments
+GET
+/api/departments
+
+
+
+[ ] Get department by ID
+GET
+/api/departments/{id}
+
+
+
+[ ] Update department
+PUT
+/api/departments/{id}
+
+
+
+[ ] Delete department
+DELETE
+/api/departments/{id}
+
+
+
+[ ] Create employee
+POST
+/api/employees
+
+
+
+[ ] Get all employees
+GET
+/api/employees
+
+
+
+[ ] Get employee by ID
+GET
+/api/employees/{id}
+
+
+
+[ ] Update employee
+PUT
+/api/employees/{id}
+
+
+
+[ ] Delete employee
+DELETE
+/api/employees/{id}
+=============================================================================
+Level 2 — Beginner to IntermediateFiltering, search and relationships0/10 completed
+[ ] Find employees by department
+GET
+/api/departments/{id}/employees
+
+
+
+[ ] Search employees by name
+GET
+/api/employees/search?name=Rahul
+
+
+
+[ ] Filter by salary range
+GET
+/api/employees/filter?minSalary=50000&maxSalary=100000
+
+
+
+[ ] Filter by status
+GET
+/api/employees?status=ACTIVE
+
+
+
+[ ] Get employee with department details
+GET
+/api/employees/{id}/details
+
+
+
+[ ] Get employees hired after a date
+GET
+/api/employees?hireDateFrom=2025-01-01
+
+
+
+[ ] Count employees by department
+GET
+/api/reports/department-count
+
+
+
+[ ] Get highest-paid employee
+GET
+/api/employees/highest-paid
+
+
+
+[ ] Sort employees by salary
+GET
+/api/employees?sort=salary,desc
+
+
+
+[ ] Paginate employees
+GET
+/api/employees?page=0&size=10
+========================
+Level 3 — IntermediateBusiness workflows and related tables0/15 completed
+[ ] Add employee address
+POST
+/api/employees/{id}/addresses
+
+
+
+[ ] Get employee addresses
+GET
+/api/employees/{id}/addresses
+
+
+
+[ ] Add salary history
+POST
+/api/employees/{id}/salary-history
+
+
+
+[ ] Get salary history
+GET
+/api/employees/{id}/salary-history
+
+
+
+[ ] Record attendance
+POST
+/api/attendance
+
+
+
+[ ] Get monthly attendance
+GET
+/api/attendance/employee/{id}?month=2026-10
+
+
+
+[ ] Submit leave request
+POST
+/api/leaves
+
+
+
+[ ] Approve leave request
+PATCH
+/api/leaves/{id}/approve
+
+
+
+[ ] Reject leave request
+PATCH
+/api/leaves/{id}/reject
+
+
+
+[ ] Get pending leave requests
+GET
+/api/leaves?status=PENDING
+
+
+
+[ ] Create project
+POST
+/api/projects
+
+
+
+[ ] Assign employee to project
+POST
+/api/projects/{projectId}/employees/{employeeId}
+
+
+
+[ ] Get employee projects
+GET
+/api/employees/{id}/projects
+
+
+
+[ ] Create expense claim
+POST
+/api/expenses
+
+
+
+[ ] Submit performance review
+POST
+/api/performance-reviews
+==============================================================
+Level 4 — AdvancedTransactions, payroll and reporting0/13 completed
+[ ] Process monthly payroll
+POST
+/api/payroll/process
+
+
+
+[ ] Get payroll by month
+GET
+/api/payroll?month=2026-10
+
+
+
+[ ] Mark payroll as paid
+PATCH
+/api/payroll/{id}/mark-paid
+
+
+
+[ ] Update employee fields dynamically
+PATCH
+/api/employees/{id}
+
+
+
+[ ] Bulk create employees
+POST
+/api/employees/bulk
+
+
+
+[ ] Bulk update employee status
+PATCH
+/api/employees/bulk/status
+
+
+
+[ ] Export employees to CSV
+GET
+/api/employees/export?format=csv
+
+
+
+[ ] Get salary statistics
+GET
+/api/reports/salary-statistics
+
+
+
+[ ] Get leave balance
+GET
+/api/leave-balances/employee/{id}
+
+
+
+[ ] Assign training to employees
+POST
+/api/trainings/{id}/enrollments
+
+
+
+[ ] Assign asset to employee
+POST
+/api/employees/{id}/assets
+
+
+
+[ ] Get audit history
+GET
+/api/audit-logs?entity=employee&id=1
+
+
+
+[ ] Generate monthly HR report
+GET
+/api/reports/monthly?month=2026-10
+=================================================================
+Level 5 — ExpertSecurity, reliability and production readiness0/13 completed
+[ ] Register user
+POST
+/api/auth/register
+
+
+
+[ ] Login and issue access token
+POST
+/api/auth/login
+
+
+
+[ ] Refresh access token
+POST
+/api/auth/refresh
+
+
+
+[ ] Logout and revoke refresh token
+POST
+/api/auth/logout
+
+
+
+[ ] Get current authenticated user
+GET
+/api/auth/me
+
+
+
+[ ] Assign role to user
+PUT
+/api/users/{id}/roles
+
+
+
+[ ] Get notifications
+GET
+/api/notifications
+
+
+
+[ ] Mark notification as read
+PATCH
+/api/notifications/{id}/read
+
+
+
+[ ] Idempotent payroll processing
+POST
+/api/payroll/process with Idempotency-Key
+
+
+
+[ ] Health check
+GET
+/actuator/health
+
+
+
+[ ] Readiness check
+GET
+/actuator/health/readiness
+
+
+
+[ ] API metrics
+GET
+/actuator/metrics
+
+
+
+[ ] API documentation
+GET
+/swagger-ui/index.html
+=============================================================
