@@ -96,4 +96,62 @@ public class DepartmentServiceImpl implements DepartmentService {
         return responseDTO;
     }
 
+    @Override
+    public DepartmentDTO updateDepartment(DepartmentDTO departmentDTO) {
+        DepartmentEntity departmentEntity =
+                departmentRepo.findByDepartmentName(departmentDTO.getExistingDepartmentName())
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                MessageConstant.ERROR_DEPARTMENT_NOT_FOUND
+                        ));
+
+        departmentEntity.setDepartmentName(departmentDTO.getDepartmentName());
+        departmentEntity.setLocation(departmentDTO.getLocation());
+
+        DepartmentEntity updatedEntity = departmentRepo.save(departmentEntity);
+
+        DepartmentDTO responseDTO = new DepartmentDTO();
+        responseDTO.setDepartmentId(updatedEntity.getDepartmentId());
+        responseDTO.setDepartmentName(updatedEntity.getDepartmentName());
+        responseDTO.setLocation(updatedEntity.getLocation());
+        return responseDTO;
+    }
+
+
+
+    @Override
+    public DepartmentDTO deleteDepartment(DepartmentDTO departmentDTO) {
+        DepartmentEntity departmentEntity = departmentRepo.findByDepartmentName(departmentDTO.getDepartmentName())
+//        DepartmentEntity departmentEntity = departmentRepo.findByDepartmentName(departmentName)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        MessageConstant.ERROR_DEPARTMENT_NOT_FOUND
+                ));
+
+        departmentRepo.delete(departmentEntity);
+
+        DepartmentDTO responseDTO = new DepartmentDTO();
+        responseDTO.setDepartmentId(departmentEntity.getDepartmentId());
+        responseDTO.setDepartmentName(departmentEntity.getDepartmentName());
+        responseDTO.setLocation(departmentEntity.getLocation());
+        return responseDTO;
+    }
+
+    @Override
+    public DepartmentDTO deleteDepartment1(String departmentName) {
+        DepartmentEntity departmentEntity = departmentRepo.findByDepartmentName(departmentName)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        MessageConstant.ERROR_DEPARTMENT_NOT_FOUND
+                ));
+
+        departmentRepo.delete(departmentEntity);
+
+        DepartmentDTO responseDTO = new DepartmentDTO();
+        responseDTO.setDepartmentId(departmentEntity.getDepartmentId());
+        responseDTO.setDepartmentName(departmentEntity.getDepartmentName());
+        responseDTO.setLocation(departmentEntity.getLocation());
+        return responseDTO;
+    }
+
 }

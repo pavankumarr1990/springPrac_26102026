@@ -11,4 +11,5 @@ public class DepartmentDTO {
     private Long departmentId;
     private String departmentName;
     private String location;
+    private String existingDepartmentName;
 }

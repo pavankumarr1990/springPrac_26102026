@@ -5,10 +5,7 @@ import com.prac26102026.prac1.service.impl.DepartmentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +28,23 @@ public class DepartmentController {
     public ResponseEntity<DepartmentDTO> addDepartmentExists(@RequestBody DepartmentDTO departmentDTO) {
         DepartmentDTO savedDepartment = service.addDepartmentExists(departmentDTO);
         return new ResponseEntity<>(savedDepartment, HttpStatus.CREATED);
+    }
+    @PutMapping("/updateDepartmentExists")
+    public ResponseEntity<DepartmentDTO> updateDepartmentExists(@RequestBody DepartmentDTO departmentDTO) {
+        DepartmentDTO savedDepartment = service.updateDepartment(departmentDTO);
+        return new ResponseEntity<>(savedDepartment, HttpStatus.CREATED);
+    }
+//
+//    @DeleteMapping("/deleteDepartment/{departmentName}")
+//    public ResponseEntity<String> deleteDepartment(@PathVariable DepartmentDTO departmentName) {
+//        service.deleteDepartment(departmentName);
+//        return new ResponseEntity<>("Department deleted successfully", HttpStatus.OK);
+//    }
+
+    @DeleteMapping("/deleteDepartment/{departmentName}")
+    public ResponseEntity<String> deleteDepartment(@PathVariable String departmentName) {
+        service.deleteDepartment1(departmentName);
+        return ResponseEntity.ok("Department deleted successfully");
     }
 
 }

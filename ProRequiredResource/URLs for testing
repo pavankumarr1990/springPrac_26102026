@@ -1,2 +1,20 @@
 http://localhost:8080
 
+
+
+==================DepartmentController.java==================
+POST- http://localhost:8080/pavan/department/addDepartmentExists
+{
+    "departmentName": "Test3",
+    "location": "Bengulur"
+}
+
+PUT - http://localhost:8080/pavan/department/updateDepartmentExists
+{
+  "existingDepartmentName": "A",
+  "departmentName": "Engineering2",
+  "location": "Building B"
+}
+
+
+===========================================================
