@@ -18,3 +18,13 @@ public class InternalServerException  extends RuntimeException {
         this.errorCode = "500";
     }
 }
+
+
+//// This tells Spring Boot exactly what status code to send back when this error happens
+//@ResponseStatus(HttpStatus.BAD_REQUEST) // Or HttpStatus.CONFLICT (409)
+//public class InternalServerException extends RuntimeException {
+//
+//    public InternalServerException(String message) {
+//        super(message);
+//    }
+//}

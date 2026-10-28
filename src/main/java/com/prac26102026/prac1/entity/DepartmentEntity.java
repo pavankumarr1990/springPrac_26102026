@@ -1,9 +1,7 @@
 package com.prac26102026.prac1.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Setter
@@ -13,8 +11,10 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "department", schema = "employee_management")
-public class Department {
+public class DepartmentEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "department_id", unique = true, nullable = false)
     private Long departmentId;
     private String departmentName;
     private String location;
