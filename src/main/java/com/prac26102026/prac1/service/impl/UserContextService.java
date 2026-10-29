@@ -5,7 +5,6 @@ import com.prac26102026.prac1.entity.ApplicationUser;
 import com.prac26102026.prac1.entity.Designation;
 import com.prac26102026.prac1.repo.ApplicationUserRepository;
 import com.prac26102026.prac1.repo.DesignationRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

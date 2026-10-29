@@ -1,5 +1,11 @@
 http://localhost:8080
 
+Swagger UI: http://localhost:8080/pavan/swagger-ui/index.html
+OpenAPI JSON: http://localhost:8080/pavan/v3/api-docs
+
+If using Swagger CLick on Authorize button and enter the below details
+enter destigantion name in the header as SM_USER=Pavan123 or else it ll not work
+
 Authentication: Basic Auth
 Note send the header or else it ll not work
 SM_USER=Pavan123
