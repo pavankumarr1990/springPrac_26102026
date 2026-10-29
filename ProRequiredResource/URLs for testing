@@ -1,6 +1,11 @@
 http://localhost:8080
 
+Authentication: Basic Auth
+Note send the header or else it ll not work
+SM_USER=Pavan123
+destigantion can be get in application_user table without user in header it ll not work
 
+http://localhost:8080/pavan/pavan/emp/1
 
 ==================DepartmentController.java==================
 POST- http://localhost:8080/pavan/department/addDepartmentExists
