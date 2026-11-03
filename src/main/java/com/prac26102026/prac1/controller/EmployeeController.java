@@ -7,14 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
-@RequestMapping("/pavan/emp")
+@RequestMapping("/emp")
 @RequiredArgsConstructor
 public class EmployeeController {
 
@@ -22,9 +21,25 @@ public class EmployeeController {
     @Autowired
     private final EmployeeServiceImpl service;
     private static final Logger LOGGER = LoggerFactory.getLogger(EmployeeController.class);
+
     @GetMapping("/{empID}")
     public ResponseEntity<EmployeeDTO> getEmployee(@PathVariable("empID") int employeeID) {
         return ResponseEntity.ok(service.getByEmpID(employeeID));
+    }
+
+    @PatchMapping ("/update/{empID}")
+    public ResponseEntity<EmployeeDTO> updateEmployeeStatus(@PathVariable("empID") int employeeID) {
+        return ResponseEntity.ok(service.UpdateStatusToInActiveEmpID(employeeID));
+    }
+
+    @GetMapping("/EmpByStatus/{status}")
+    public ResponseEntity<List<EmployeeDTO>> getAllEmpByStatus(@PathVariable("status") String status) {
+        return ResponseEntity.ok(service.getAllEmpByStatus(status));
+    }
+
+    @GetMapping("/EmpByJobTitle/{jobTitle}")
+    public ResponseEntity<List<EmployeeDTO>> getEmpByDepartId(@PathVariable String jobTitle) {
+        return ResponseEntity.ok(service.getEmpByDepartId(jobTitle));
     }
 
 }

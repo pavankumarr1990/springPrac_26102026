@@ -17,5 +17,6 @@ public class EmployeeEntity {
     @Column(name = "employee_id", unique = true, nullable = false)
     private Integer employeeId;
     private String first_name;
-
+    private String status;
+    private String jobTitle;
 }

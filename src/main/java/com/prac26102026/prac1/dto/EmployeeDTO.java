@@ -6,9 +6,11 @@ import lombok.*;
 @Getter
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 public class EmployeeDTO {
     private Integer employeeID;
     private String first_name;
+    private String status;
+    private String jobTitle;
 
 }

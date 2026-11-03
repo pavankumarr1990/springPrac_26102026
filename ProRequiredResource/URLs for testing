@@ -29,3 +29,5 @@ PUT - http://localhost:8080/pavan/department/updateDepartmentExists
 
 
 ===========================================================
+http://localhost:8080/pavan/emp/EmpByJobTitle/Java Developer
+http://localhost:8080/pavan/emp/EmpByStatus/INACTIVE
