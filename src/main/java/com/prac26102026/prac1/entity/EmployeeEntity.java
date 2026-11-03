@@ -19,4 +19,5 @@ public class EmployeeEntity {
     private String first_name;
     private String status;
     private String jobTitle;
+    private long salary;
 }

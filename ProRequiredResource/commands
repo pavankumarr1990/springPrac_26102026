@@ -1,2 +1,5 @@
 mvn clean install -U
 mvn -q -DskipTests compile
+
+In IntelliJ IDEA, to turn off GitHub Copilot inline suggestions, open Tools → GitHub Copilot → Disable Completions. You can also use Ctrl+Alt+S and search settings for “GitHub Copilot” or “inline completions.”
+For IntelliJ’s own inline completion, go to Settings → Editor → General → Inline Completion and disable it.

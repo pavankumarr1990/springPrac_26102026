@@ -31,3 +31,7 @@ PUT - http://localhost:8080/pavan/department/updateDepartmentExists
 ===========================================================
 http://localhost:8080/pavan/emp/EmpByJobTitle/Java Developer
 http://localhost:8080/pavan/emp/EmpByStatus/INACTIVE
+http://localhost:8080/pavan/emp/employees/search?firstName=SeedFirst162
+http://localhost:8080/pavan/emp/employees/search?pavanName=SeedFirst162
+
+http://localhost:8080/pavan/emp/employees/filter?minSalary=50000&maxSalary=100000

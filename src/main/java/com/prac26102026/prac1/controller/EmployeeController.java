@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 
@@ -37,9 +38,22 @@ public class EmployeeController {
         return ResponseEntity.ok(service.getAllEmpByStatus(status));
     }
 
+
     @GetMapping("/EmpByJobTitle/{jobTitle}")
     public ResponseEntity<List<EmployeeDTO>> getEmpByDepartId(@PathVariable String jobTitle) {
         return ResponseEntity.ok(service.getEmpByDepartId(jobTitle));
+    }
+
+///api/employees/search?name=Rahul
+    @GetMapping("/employees/search")
+    public ResponseEntity<List<EmployeeDTO>> getEmpByName(@RequestParam String pavanName) {
+        return ResponseEntity.ok(Collections.singletonList(service.getEmpByFirstName(pavanName)));
+    }
+
+    /// ///api/employees/filter?minSalary=50000&maxSalary=100000
+    @GetMapping("/employees/filter")
+    public ResponseEntity<List<List<EmployeeDTO>>> getEmpByName(@RequestParam long minSalary, @RequestParam long maxSalary) {
+        return ResponseEntity.ok(Collections.singletonList(service.getEmpSalaryFilter(minSalary, maxSalary)));
     }
 
 }

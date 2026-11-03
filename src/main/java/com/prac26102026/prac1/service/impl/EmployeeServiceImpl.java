@@ -61,9 +61,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<EmployeeDTO> getAllEmpByStatus(String status) {
-       return repo.findAll().stream().filter(emp -> emp.getStatus().equalsIgnoreCase(status))
-               .map(this::toDTO)
-               .toList();
+        return repo.findAll().stream().filter(emp -> emp.getStatus().equalsIgnoreCase(status))
+                .map(this::toDTO)
+                .toList();
     }
 
     @Override
@@ -71,6 +71,28 @@ public class EmployeeServiceImpl implements EmployeeService {
         return repo.findAll().stream().filter(emp -> emp.getJobTitle().equalsIgnoreCase(jobTitle))
                 .map(this::toDTO)
 //                .map(emp -> toDTO(emp))
+                .toList();
+    }
+
+    @Override
+    public EmployeeDTO getEmpByFirstName(String firstName) {
+        EmployeeEntity emp = repo.findAll().stream().filter(emp1 -> emp1.getFirst_name().equalsIgnoreCase(firstName))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        return toDTO(emp);
+    }
+
+    @Override
+    public List<EmployeeDTO> getEmpSalaryFilter(long minSalary, long maxSalary) {
+        return repo.findAll().stream().filter(emp1 -> emp1.getSalary() <= maxSalary && emp1.getSalary() >= minSalary)
+                .map(this::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<EmployeeDTO> getHighestPaidEmp() {
+        return repo.findAll().stream().filter(emp1 -> emp1.getSalary() == repo.findAll().stream().mapToLong(EmployeeEntity::getSalary).max().orElse(0))
+                .map(this::toDTO)
                 .toList();
     }
 
