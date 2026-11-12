@@ -487,3 +487,5 @@ ON CONFLICT (email) DO UPDATE SET
         ('testuser', NULL, TRUE),
         ('inactiveuser', NULL, FALSE);
         ========================================
+        ALTER TABLE employee_management.application_user
+        ADD COLUMN password_hash VARCHAR(255);

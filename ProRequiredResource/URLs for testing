@@ -35,3 +35,15 @@ http://localhost:8080/pavan/emp/employees/search?firstName=SeedFirst162
 http://localhost:8080/pavan/emp/employees/search?pavanName=SeedFirst162
 
 http://localhost:8080/pavan/emp/employees/filter?minSalary=50000&maxSalary=100000
+
+======================actuator============================
+/actuator/metrics  - 	List all available metrics
+/actuator/metrics/jvm.memory.used  - 	JVM memory usage
+/actuator/metrics/jvm.threads.live  - 		Live thread count
+/actuator/metrics/process.cpu.usage  - 		Process CPU usage
+/actuator/metrics/system.cpu.usage  - 		System CPU usage
+/actuator/metrics/http.server.requests  - 		HTTP request metrics
+/actuator/metrics/hikaricp.connections.active  - 		Active database connections
+http://localhost:8080/pavan/actuator/health/readiness
+===========================================================
+http://localhost:8080/pavan/api/auth/me
